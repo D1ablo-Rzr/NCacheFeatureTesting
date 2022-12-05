@@ -1,0 +1,49 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Alachisoft.NCache.SDK" Version="5.3.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Models\Models.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="Alachisoft.NCache.Cache">
+      <HintPath>..\..\..\..\..\..\Program Files\NCache\bin\service\Alachisoft.NCache.Cache.dll</HintPath>
+    </Reference>
+    <Reference Include="Alachisoft.NCache.Client">
+      <HintPath>..\..\..\..\..\..\Program Files\NCache\bin\service\Alachisoft.NCache.Client.dll</HintPath>
+    </Reference>
+    <Reference Include="Alachisoft.NCache.Runtime">
+      <HintPath>..\..\..\..\..\..\Program Files\NCache\bin\service\Alachisoft.NCache.Runtime.dll</HintPath>
+    </Reference>
+    <Reference Include="Alachisoft.NCache.Web">
+      <HintPath>..\..\..\..\..\..\Program Files\NCache\bin\service\Alachisoft.NCache.Web.dll</HintPath>
+    </Reference>
+    <Reference Include="DAL">
+      <HintPath>..\DAL\bin\Debug\DAL.dll</HintPath>
+    </Reference>
+    <Reference Include="Models">
+      <HintPath>..\Models\bin\Debug\Models.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="client.ncconf">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="config.ncconf">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="tls.ncconf">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+</Project>
