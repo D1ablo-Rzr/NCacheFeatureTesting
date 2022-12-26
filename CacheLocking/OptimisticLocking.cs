@@ -4,7 +4,7 @@ using Alachisoft.NCache.Client;
 using System.Text;
 using Models;
 
-namespace NCacheFeatureTesting
+namespace CacheLocking
 {
     public class OptimisticLocking
     {
@@ -12,14 +12,16 @@ namespace NCacheFeatureTesting
         public static void Run()
         {
             InitializeCache();
-            List<Customer> TestList = AddCustomer(73);
+            List<Customer> TestList = AddCustomer();
             var vers = AddIteminCache(TestList);
-            var item = GetCacheItem("2");
-            Console.ReadLine();
-            var vers1 = UpdateItem("2", item, vers);
-            var vers2 = UpdateItem("2", item, vers1);
-            var result = GetifNewer("2", vers2);
-            RemoveItem("2", vers2);
+            List<Customer> TestList1 = testdata();
+            var vers1 = AddwithVersion(TestList1, vers);
+            //var item = GetCacheItem("2");
+            //Console.ReadLine();
+            //var vers1 = UpdateItem("2", item, vers);
+            //var vers2 = UpdateItem("2", item, vers1);
+            //var result = GetifNewer("2", vers2);
+            //RemoveItem("2", vers2);
             
         }
 
@@ -29,10 +31,10 @@ namespace NCacheFeatureTesting
             Console.WriteLine("Cache Initialized");
         }
 
-        private static List<Customer> AddCustomer(int i)
+        private static List<Customer> AddCustomer()
         {
             List<Customer> CustList = new List<Customer>();
-            for (int j = 1; j <= i; j++)
+            for (int j = 120; j <= 200; j++)
             {
                 Customer Cust = new Customer();
                 Cust.CustomerId = "ALPHAK" + j;
@@ -46,11 +48,36 @@ namespace NCacheFeatureTesting
             return CustList;
         }
 
+        private static List<Customer> testdata()
+        {
+            List<Customer> CustList = new List<Customer>();
+            for (int j = 200; j <= 250; j++)
+            {
+                Customer Cust = new Customer();
+                Cust.CustomerId = "ALPHAK" + j;
+                Cust.CompanyName = "Alachisoft" + j;
+                Cust.CustomerName = "Saifullah" + j;
+                Cust.CustomerTitle = "CSE" + j;
+                Cust.Address = "Islamabad" + j;
+                CustList.Add(Cust);
+            }
+            return CustList;
+        }
+
         private static CacheItemVersion AddIteminCache(List<Customer> Cust)
         {
             string key = "2";
-
             CacheItem item = new CacheItem(Cust);
+            CacheItemVersion version = _cache.Add(key, item);
+            Console.WriteLine("Data Added Succesfully");
+            return version;
+        }
+
+        private static CacheItemVersion AddwithVersion(List<Customer> Cust, CacheItemVersion ver)
+        {
+            string key = "3";
+            CacheItem item = new CacheItem(Cust);
+            item.Version = ver;
             CacheItemVersion version = _cache.Add(key, item);
             Console.WriteLine("Data Added Succesfully");
             return version;

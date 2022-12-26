@@ -7,7 +7,7 @@ using Alachisoft.NCache.Runtime.Caching;
 using Alachisoft.NCache.Client;
 using Models;
 
-namespace NCacheFeatureTesting
+namespace CacheLocking
 {
     public class PessimisticLocking
     {
@@ -17,22 +17,13 @@ namespace NCacheFeatureTesting
             InitializeCache();
             //_cache.Clear();
             LockHandle lockHandle = new LockHandle();
-            LockHandle lockHandle1 = new LockHandle();
-            TimeSpan timeSpan = new TimeSpan(0, 0, 0, 20);
-
-            //List<Customer> TestList = AddCustomer(73);
+            TimeSpan timeSpan = new TimeSpan(0, 0, 5, 0);
+            //List<Customer> TestList = AddCustomer(10);
             //AddIteminCache(TestList);
-            //string key = GetKey();
-            //lockHandle = LockItem("2", lockHandle, timeSpan);
-
-            //UpdateItem("2", timeSpan, lockHandle);
-            //GetItem("2", lockHandle, timeSpan);
-            ////UnLockForcefull("2",lockHandle);
-
-
-            RemoveItem("2",lockHandle1);
-            //LockItem("1", lockHandle, timeSpan);
-            //GetItem("1", lockHandle1, timeSpan);
+            Customer cust = _cache.Get<Customer>("ALPHAK4");
+            PrintCustomerDetails(cust);
+            LockItem("ALPHAK4", lockHandle, timeSpan);
+            UnLockForcefull("ALPHAK4",lockHandle);
         }
 
         private static void InitializeCache()
@@ -60,11 +51,11 @@ namespace NCacheFeatureTesting
 
         private static void AddIteminCache(List<Customer> Cust)
         {
-            string key = "2";
-
-            CacheItem item = new CacheItem(Cust);
-            _cache.Add(key, item);
-            Console.WriteLine("Data Added Succesfully");
+            foreach(var c in Cust)
+            {
+                CacheItem item = new CacheItem(c);
+                _cache.Add(c.CustomerId, item);
+            }
         }
 
         private static void RemoveItem(string key,LockHandle lockHandle)
@@ -87,12 +78,18 @@ namespace NCacheFeatureTesting
             return "0";
         }
 
-        private static void GetItem(string key, LockHandle lockHandle, TimeSpan timeSpan)
+        private static void GetItemTrue(string key, LockHandle lockHandle, TimeSpan timeSpan)
         {
-            List<Customer> getCustomer = _cache.Get<List<Customer>>(key, false, timeSpan, ref lockHandle);
+            Customer getCustomer = _cache.Get<Customer>(key, true, timeSpan, ref lockHandle);
+            Console.WriteLine("Lock acquired on " + lockHandle.LockId +" "+lockHandle.LockDate);
+            Console.WriteLine(getCustomer.CustomerId);
+        }
 
-            PrintCustomerDetails(getCustomer);
-            Console.WriteLine("Lock acquired on " + lockHandle.LockId);
+        private static void GetItemFalse(string key, LockHandle lockHandle, TimeSpan timeSpan)
+        {
+            Customer getCustomer = _cache.Get<Customer>(key, false, timeSpan, ref lockHandle);
+            Console.WriteLine("Lock acquired on " + lockHandle.LockId + " " + lockHandle.LockDate);
+            Console.WriteLine(getCustomer.CustomerId);
         }
 
         private static LockHandle LockItem(string key, LockHandle lockHandle, TimeSpan timeSpan)
@@ -118,16 +115,17 @@ namespace NCacheFeatureTesting
 
         private static void UnLockForcefull(string key, LockHandle lockHandle)
         {
+            Console.WriteLine(key);
             _cache.Unlock(key);
-            TimeSpan timeSpan = new TimeSpan(0, 0, 0, 20);
-            List<Customer> getCustomer = _cache.Get<List<Customer>>(key, false, timeSpan, ref lockHandle);
+            TimeSpan timeSpan = new TimeSpan(0, 0, 0, 10);
+            Customer getCustomer = _cache.Get<Customer>(key);
 
             PrintCustomerDetails(getCustomer);
         }
 
         private static void UpdateItem(string key, TimeSpan timespan, LockHandle lockHandle)
         {
-            List<Customer> CustList = _cache.Get<List<Customer>>(key, false, timespan, ref lockHandle);
+            List<Customer> CustList = _cache.Get<List<Customer>>(key, true, timespan, ref lockHandle);
             CustList[0].CustomerName = "Edward";
             CacheItem item = new CacheItem(CustList);
             CacheItemVersion version = _cache.Insert(key, item, lockHandle, true);
@@ -149,6 +147,24 @@ namespace NCacheFeatureTesting
             else
             {
                 Console.WriteLine("No data was returned");
+            }
+        }
+
+        public static void PrintCustomerDetails(Customer c)
+        {
+            if (c != null)
+            {
+                Console.WriteLine();
+                Console.WriteLine("Customer Details are as follows: ");
+                Console.WriteLine("ID: " + c.CustomerId);
+                Console.WriteLine("Name: " + c.CustomerName);
+                Console.WriteLine("Company Name: " + c.CompanyName);
+                Console.WriteLine("Address: " + c.Address);
+            }
+            else
+            {
+                Console.WriteLine("No data was returned");
+            
             }
         }
     }

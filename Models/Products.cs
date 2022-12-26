@@ -17,7 +17,7 @@ namespace Models
         public string ProductName { get; set; }
 
         [QueryIndexed]
-        public int UnitPrice { get; set; }
+        public decimal UnitPrice { get; set; }
         
     }
 }
